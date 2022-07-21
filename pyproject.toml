@@ -1,0 +1,19 @@
+[project]
+name = ""
+version = ""
+description = ""
+authors = [
+    {name = "Matthew Newland", email = "matthewnnewland@gmail.com"},
+]
+dependencies = [
+    "typer>=0.6.1",
+    "tabulate>=0.8.10",
+]
+requires-python = ">=3.10"
+license = {text = "MIT"}
+
+[tool.pdm]
+
+[build-system]
+requires = ["pdm-pep517>=0.12.0"]
+build-backend = "pdm.pep517.api"
