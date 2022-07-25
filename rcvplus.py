@@ -124,7 +124,7 @@ def btr_irv(ballots: list[Ballot]) -> Result:
         top_scoring_candidate = max(scores, key=lambda x: scores[x])
         if scores[top_scoring_candidate] > threshold:
             winner = top_scoring_candidate
-            rounds.append(Round(scores, winner=winner, loser=None, ballots=ballots))
+            rounds.append(Round(scores, winner=winner, loser=None, nexhausted=nexhausted, ballots=ballots))
             continue
         # Eliminate the least-preferred of the bottom two candidates
         *_, (bot2, _), (bot1, _) = scores.most_common()
@@ -160,7 +160,7 @@ def irv(ballots: list[Ballot]) -> Result:
         top_scoring_candidate = max(scores, key=lambda x: scores[x])
         if scores[top_scoring_candidate] > threshold:
             winner = top_scoring_candidate
-            rounds.append(Round(scores, winner=winner, loser=None, ballots=ballots))
+            rounds.append(Round(scores, winner=winner, loser=None, nexhausted=nexhausted, ballots=ballots))
             continue
         # Eliminate the candidate with the least first choices
         loser = min(scores, key=lambda x: scores[x])
