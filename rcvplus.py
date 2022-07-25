@@ -106,9 +106,21 @@ def btr_irv(ballots: list[Ballot]) -> Result:
     rounds: list[Round] = []
     threshold = len(ballots) // 2
     while winner is None:
+        nexhausted = 0
         scores = Counter()
         for ballot in ballots:
+            if ballot.top_choice is None:
+                nexhausted += 1
+                continue
             scores[ballot.top_choice] += 1
+        if len(scores) == 1:
+            winner, *_ = scores
+            rounds.append(
+                Round(
+                    scores, winner, loser=None, nexhausted=nexhausted, ballots=ballots
+                )
+            )
+            continue
         top_scoring_candidate = max(scores, key=lambda x: scores[x])
         if scores[top_scoring_candidate] > threshold:
             winner = top_scoring_candidate
@@ -130,9 +142,21 @@ def irv(ballots: list[Ballot]) -> Result:
     rounds: list[Round] = []
     threshold = len(ballots) // 2
     while winner is None:
+        nexhausted = 0
         scores = Counter()
         for ballot in ballots:
+            if ballot.top_choice is None:
+                nexhausted += 1
+                continue
             scores[ballot.top_choice] += 1
+        if len(scores) == 1:
+            winner, *_ = scores
+            rounds.append(
+                Round(
+                    scores, winner, loser=None, nexhausted=nexhausted, ballots=ballots
+                )
+            )
+            continue
         top_scoring_candidate = max(scores, key=lambda x: scores[x])
         if scores[top_scoring_candidate] > threshold:
             winner = top_scoring_candidate
@@ -245,9 +269,21 @@ class PRResult:
         headers = ["Party", "Votes", "Percentage", "Seats", "Seat %"]
         table = []
         for party, seats in self.party_seats.most_common():
-            vote_percentage = f"{self.party_votes[party] / sum(self.party_votes.values()):%}"
-            seat_percentage = f"{self.party_seats[party] / sum(self.party_seats.values()):%}"
-            table.append([party, self.party_votes[party], vote_percentage, seats, seat_percentage])
+            vote_percentage = (
+                f"{self.party_votes[party] / sum(self.party_votes.values()):%}"
+            )
+            seat_percentage = (
+                f"{self.party_seats[party] / sum(self.party_seats.values()):%}"
+            )
+            table.append(
+                [
+                    party,
+                    self.party_votes[party],
+                    vote_percentage,
+                    seats,
+                    seat_percentage,
+                ]
+            )
 
         return tabulate(table, headers)
 
@@ -258,7 +294,7 @@ def webster_pr(party_votes: dict[Candidate, int], seats: int) -> PRResult:
     while sum(party_seats.values()) < seats:
         quotients = {}
         for party, votes in party_votes.items():
-            quotients[party] = votes / (2*party_seats[party] + 1)
+            quotients[party] = votes / (2 * party_seats[party] + 1)
 
         winner = max(quotients, key=lambda x: quotients[x])
         party_seats[winner] += 1
