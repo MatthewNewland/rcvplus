@@ -16,7 +16,7 @@ class Round:
     scores: Mapping[Candidate, int]
     winner: Optional[Candidate]
     loser: Optional[Candidate]
-    nexhausted: int = 0
+    exhausted: int = 0
     defeat: Optional[Counter[Candidate]] = None
     ballots: list[Ballot] = field(default_factory=list)
 
@@ -31,9 +31,9 @@ class Round:
             else:
                 win_loss_col = "-"
             table.append([candidate, score, score / len(self.ballots), win_loss_col])
-        if self.nexhausted > 0:
+        if self.exhausted > 0:
             table.append(
-                ["EXHAUSTED", self.nexhausted, self.nexhausted / len(self.ballots), "-"]
+                ["EXHAUSTED", self.exhausted, self.exhausted / len(self.ballots), "-"]
             )
         out = [tabulate(table, headers, floatfmt=("", "", "%", ""))]
         if self.defeat:
@@ -117,7 +117,7 @@ def btr_irv(ballots: list[Ballot]) -> Result:
             winner, *_ = scores
             rounds.append(
                 Round(
-                    scores, winner, loser=None, nexhausted=nexhausted, ballots=ballots
+                    scores, winner, loser=None, exhausted=nexhausted, ballots=ballots
                 )
             )
             continue
@@ -142,18 +142,18 @@ def irv(ballots: list[Ballot]) -> Result:
     rounds: list[Round] = []
     threshold = len(ballots) // 2
     while winner is None:
-        nexhausted = 0
+        exhausted = 0
         scores = Counter()
         for ballot in ballots:
             if ballot.top_choice is None:
-                nexhausted += 1
+                exhausted += 1
                 continue
             scores[ballot.top_choice] += 1
         if len(scores) == 1:
             winner, *_ = scores
             rounds.append(
                 Round(
-                    scores, winner, loser=None, nexhausted=nexhausted, ballots=ballots
+                    scores, winner, loser=None, exhausted=exhausted, ballots=ballots
                 )
             )
             continue
@@ -196,10 +196,10 @@ def stv(ballots: list[Ballot], seats: int = 1) -> STVResult:
     eliminated = []
     while len(winners) < seats:
         scores = Counter()
-        nexhausted = 0
+        exhausted = 0
         for ballot in ballots:
             if ballot.top_choice is None:
-                nexhausted += 1
+                exhausted += 1
                 continue
             scores[ballot.top_choice] += ballot.weight
         if len(scores) == 1:
@@ -210,7 +210,7 @@ def stv(ballots: list[Ballot], seats: int = 1) -> STVResult:
                     scores,
                     winner=winner,
                     loser=None,
-                    nexhausted=nexhausted,
+                    exhausted=exhausted,
                     ballots=ballots,
                 )
             )
@@ -221,7 +221,7 @@ def stv(ballots: list[Ballot], seats: int = 1) -> STVResult:
         #     while len(winners) < seats:
         #         winners.append(eliminated.pop())
         #     continue
-        threshold = (len(ballots) - nexhausted) // (seats + 1)
+        threshold = (len(ballots) - exhausted) // (seats + 1)
         top_scorer = max(scores, key=lambda x: scores[x])
         if scores[top_scorer] > threshold:
             winners.append(top_scorer)
@@ -231,7 +231,7 @@ def stv(ballots: list[Ballot], seats: int = 1) -> STVResult:
                     winner=top_scorer,
                     loser=None,
                     ballots=ballots,
-                    nexhausted=nexhausted,
+                    exhausted=exhausted,
                 )
             )
             surplus = scores[top_scorer] - threshold
@@ -253,7 +253,7 @@ def stv(ballots: list[Ballot], seats: int = 1) -> STVResult:
                     loser=eliminandum,
                     defeat=defeat,
                     ballots=ballots,
-                    nexhausted=nexhausted,
+                    exhausted=exhausted,
                 )
             )
             eliminated.append(eliminandum)
