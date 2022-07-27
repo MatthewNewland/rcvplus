@@ -116,15 +116,21 @@ def btr_irv(ballots: list[Ballot]) -> Result:
         if len(scores) == 1:
             winner, *_ = scores
             rounds.append(
-                Round(
-                    scores, winner, loser=None, exhausted=nexhausted, ballots=ballots
-                )
+                Round(scores, winner, loser=None, exhausted=nexhausted, ballots=ballots)
             )
             continue
         top_scoring_candidate = max(scores, key=lambda x: scores[x])
         if scores[top_scoring_candidate] > threshold:
             winner = top_scoring_candidate
-            rounds.append(Round(scores, winner=winner, loser=None, nexhausted=nexhausted, ballots=ballots))
+            rounds.append(
+                Round(
+                    scores,
+                    winner=winner,
+                    loser=None,
+                    nexhausted=nexhausted,
+                    ballots=ballots,
+                )
+            )
             continue
         # Eliminate the least-preferred of the bottom two candidates
         *_, (bot2, _), (bot1, _) = scores.most_common()
@@ -152,15 +158,21 @@ def irv(ballots: list[Ballot]) -> Result:
         if len(scores) == 1:
             winner, *_ = scores
             rounds.append(
-                Round(
-                    scores, winner, loser=None, exhausted=exhausted, ballots=ballots
-                )
+                Round(scores, winner, loser=None, exhausted=exhausted, ballots=ballots)
             )
             continue
         top_scoring_candidate = max(scores, key=lambda x: scores[x])
         if scores[top_scoring_candidate] > threshold:
             winner = top_scoring_candidate
-            rounds.append(Round(scores, winner=winner, loser=None, nexhausted=nexhausted, ballots=ballots))
+            rounds.append(
+                Round(
+                    scores,
+                    winner=winner,
+                    loser=None,
+                    nexhausted=nexhausted,
+                    ballots=ballots,
+                )
+            )
             continue
         # Eliminate the candidate with the least first choices
         loser = min(scores, key=lambda x: scores[x])
@@ -263,12 +275,15 @@ def stv(ballots: list[Ballot], seats: int = 1) -> STVResult:
 @dataclass
 class PRResult:
     party_votes: dict[str, int]
-    party_seats: Counter[str]
+    party_seats: dict[str]
 
     def __repr__(self) -> str:
         headers = ["Party", "Votes", "Percentage", "Seats", "Seat %"]
         table = []
-        for party, seats in self.party_seats.most_common():
+        for party in sorted(
+            self.party_votes, key=lambda x: self.party_votes[x], reverse=True
+        ):
+            seats = self.party_seats[party]
             vote_percentage = (
                 f"{self.party_votes[party] / sum(self.party_votes.values()):%}"
             )
