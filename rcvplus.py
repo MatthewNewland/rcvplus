@@ -169,7 +169,7 @@ def irv(ballots: list[Ballot]) -> Result:
                     scores,
                     winner=winner,
                     loser=None,
-                    nexhausted=nexhausted,
+                    nexhausted=exhausted,
                     ballots=ballots,
                 )
             )
