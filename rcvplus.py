@@ -106,17 +106,17 @@ def btr_irv(ballots: list[Ballot]) -> Result:
     rounds: list[Round] = []
     threshold = len(ballots) // 2
     while winner is None:
-        nexhausted = 0
+        exhausted = 0
         scores = Counter()
         for ballot in ballots:
             if ballot.top_choice is None:
-                nexhausted += 1
+                exhausted += 1
                 continue
             scores[ballot.top_choice] += 1
         if len(scores) == 1:
             winner, *_ = scores
             rounds.append(
-                Round(scores, winner, loser=None, exhausted=nexhausted, ballots=ballots)
+                Round(scores, winner, loser=None, exhausted=exhausted, ballots=ballots)
             )
             continue
         top_scoring_candidate = max(scores, key=lambda x: scores[x])
@@ -127,7 +127,7 @@ def btr_irv(ballots: list[Ballot]) -> Result:
                     scores,
                     winner=winner,
                     loser=None,
-                    nexhausted=nexhausted,
+                    exhausted=exhausted,
                     ballots=ballots,
                 )
             )
@@ -169,7 +169,7 @@ def irv(ballots: list[Ballot]) -> Result:
                     scores,
                     winner=winner,
                     loser=None,
-                    nexhausted=exhausted,
+                    exhausted=exhausted,
                     ballots=ballots,
                 )
             )
