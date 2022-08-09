@@ -204,7 +204,6 @@ class STVResult:
 def stv(ballots: list[Ballot], seats: int = 1) -> STVResult:
     winners = []
     rounds = []
-    threshold = len(ballots) // (seats + 1)
     eliminated = []
     while len(winners) < seats:
         scores = Counter()
@@ -229,11 +228,7 @@ def stv(ballots: list[Ballot], seats: int = 1) -> STVResult:
             for ballot in ballots:
                 ballot.remove(winner)
             continue
-        # if not scores:
-        #     while len(winners) < seats:
-        #         winners.append(eliminated.pop())
-        #     continue
-        threshold = (len(ballots) - exhausted) // (seats + 1)
+        threshold = (len(ballots) - exhausted) / (seats + 1)
         top_scorer = max(scores, key=lambda x: scores[x])
         if scores[top_scorer] > threshold:
             winners.append(top_scorer)
@@ -252,8 +247,6 @@ def stv(ballots: list[Ballot], seats: int = 1) -> STVResult:
                     ballot.weight *= surplus / scores[top_scorer]
                 ballot.remove(top_scorer)
         else:
-            # *_, (second_from_bottom, _), (bottom, _) = scores.most_common()
-            # (eliminandum, defeat) = _pairwise_loser(ballots, second_from_bottom, bottom, outer_scores=scores)
             defeat = None
             eliminandum = min(scores, key=lambda x: scores[x])
             for ballot in ballots:
